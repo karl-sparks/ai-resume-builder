@@ -4,17 +4,17 @@ from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 
-def readInput():
+def read_input() -> dict:
     with open('input.json') as json_file:
         data = json.load(json_file)
         return data
 
-def generateModel(template, model = "gpt-3.5-turbo"):
-    llm = ChatOpenAI(model_name = model)
+def generate_model(template, model_name = "gpt-3.5-turbo") -> LLMChain:
+    llm = ChatOpenAI(model = model_name)
     prompt = PromptTemplate(template=template, input_variables = ["context", "job_title", "company_name", "job_description"])
     return LLMChain(prompt=prompt, llm=llm)
 
-def add_data_to_json(file_path, new_data):
+def add_data_to_json(file_path, new_data) -> None:
     # Step 1: Read existing JSON data from the file (if any)
     try:
         with open(file_path, 'r') as file:
@@ -32,9 +32,9 @@ def add_data_to_json(file_path, new_data):
     print("Data added to JSON file.")
 
 
-input_data = readInput()
+input_data = read_input()
 
-llm_model = generateModel(input_data["template"])
+llm_model = generate_model(input_data["template"])
 
 print("Asking Model...")
 answer = llm_model.run(**input_data)
