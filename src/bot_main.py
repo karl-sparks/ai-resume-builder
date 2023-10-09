@@ -11,7 +11,7 @@ def read_input() -> dict:
         data = json.load(json_file)
         return data
 
-def generate_model(template, model_name = "gpt-3.5-turbo") -> LLMChain:
+def generate_model(model_name, template) -> LLMChain:
     """Generate a model based on the template."""
     llm = ChatOpenAI(model = model_name)
 
@@ -39,11 +39,13 @@ def add_data_to_json(file_path, new_data) -> None:
 
     print("Data added to JSON file.")
 
-def main() -> None:
+def ask_ai(model_name: str, question: str) -> str:
     """Main function."""
-    input_data = read_input()
+    input_template = read_input()
 
-    llm_model = generate_model(input_data["template"])
+    input_data = {"question": question}
+
+    llm_model = generate_model(model_name, input_template["template"])
 
     print("Asking Model...")
     answer = llm_model.run(**input_data)
@@ -58,5 +60,4 @@ def main() -> None:
 
     add_data_to_json('answer_prompt.json', answer_prompt)
 
-if __name__ == "__main__":
-    main()
+    return answer
