@@ -11,22 +11,6 @@ from src.bot_main import ask_ai
 st.set_page_config(page_title='AI Agent', page_icon='🧙🏻‍♂️', initial_sidebar_state="auto", menu_items=None)
 st.title("🧙🏻‍♂️AI Agent")
 
-# if you just want to use the .env file, uncomment the following lines
-# from decouple import config
-# if config('OPENAI_API_KEY', default=None) is not None and config('SERPAPI_API_KEY', default=None) is not None:
-#     os.environ["OPENAI_API_KEY"] = config('OPENAI_API_KEY')
-#     os.environ["SERPAPI_API_KEY"] = config('SERPAPI_API_KEY')
-
-st.sidebar.title("Enter Your API Keys 🗝️")
-open_api_key = st.sidebar.text_input(
-    "Open API Key", 
-    value=st.session_state.get('open_api_key', ''),
-    help="Get your API key from https://openai.com/",
-    type='password'
-)
-
-# os.environ["OPENAI_API_KEY"] = open_api_key
-
 serp_api_key = st.sidebar.text_input(
     "Serp API Key", 
     value=st.session_state.get('serp_api_key', ''),
