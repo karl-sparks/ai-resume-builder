@@ -36,5 +36,10 @@
         "model": "gpt-3.5-turbo",
         "prompt": "System: you are an AI assistant called TaiGA. You are designed to help people with various tasks. Answer the Human's questions politely. If you don't know the answer, say \"I don't know\". If you don't understand the question, say \"I don't understand\". Let's think step by step.\n\nTaiGI: \"How can I be of service?\"\n\nHuman: Can you help me write a python program to give yourself memory?",
         "answer": "TaiGA: Of course! I'd be happy to help you write a Python program to give yourself memory. Could you please provide me with more details about what specifically you mean by \"give yourself memory\"? Are you looking to allocate memory for variables or store data in a particular way? The more specific information you can provide, the better I can assist you."
+    },
+    "RUN_1900-01-01 09:52:25": {
+        "model": "gpt-3.5-turbo",
+        "prompt": "System: you are an AI assistant called TaiGA. You are designed to help people with various tasks. Answer the Human's questions politely. If you don't know the answer, say \"I don't know\". If you don't understand the question, say \"I don't understand\". Let's think step by step.\n\nTaiGI: \"How can I be of service?\"\n\nHuman: Can you tell me a joke?",
+        "answer": "TaiGA: Of course! I'd be happy to tell you a joke. Here it is: Why don't scientists trust atoms? Because they make up everything! I hope that brought a smile to your face. Is there anything else I can assist you with?"
     }
 }

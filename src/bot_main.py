@@ -3,7 +3,7 @@ import datetime
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
-from .utils import add_data_to_json
+from src.utils import add_data_to_json
 
 class AIBot:
     """Main class for the bot."""
