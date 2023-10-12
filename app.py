@@ -1,83 +1,40 @@
 """Main application file"""
 import os
-from dotenv import load_dotenv
-from flask import Flask, redirect, url_for, render_template
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
-from flask_dance.contrib.google import make_google_blueprint, google
 
-load_dotenv()
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_bcrypt import Bcrypt
+from flask_migrate import Migrate
 
-app = Flask(__name__)
-app.secret_key = "supersecretkey"
+from flask_login import (
+    UserMixin,
+    login_user,
+    LoginManager,
+    current_user,
+    logout_user,
+    login_required,
+)
 
 login_manager = LoginManager()
-login_manager.init_app(app)
+login_manager.session_protection = "strong"
+login_manager.login_view = "login"
+login_manager.login_message_category = "info"
 
-blueprint = make_google_blueprint(
-    client_id=os.getenv("GOOGLE_CLIENT_ID"),
-    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
-    scope=["profile", "email"],
-    redirect_url="/google-login",
-)
-app.register_blueprint(blueprint, url_prefix="/login")
+db = SQLAlchemy()
+migrate = Migrate()
+bcrypt = Bcrypt()
 
 
-class User(UserMixin):
-    pass
+def create_app():
+    app = Flask(__name__)
 
+    app.secret_key = os.getenv("SECRET_KEY")
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User.get(user_id)
+    login_manager.init_app(app)
+    db.init_app(app)
+    migrate.init_app(app, db)
+    bcrypt.init_app(app)
 
-
-@app.route("/")
-def index():
-    return render_template("index.html")
-
-
-@app.route("/login")
-def login():
-    if not google.authorized:
-        return redirect(url_for("google.login"))
-    resp = google.get("/oauth2/v2/userinfo")
-    if resp.ok:
-        email = resp.json()["email"]
-        user = User()
-        user.id = email
-        login_user(user)
-        return redirect(url_for("home"))
-    else:
-        return "Error"
-
-
-@app.route("/google-login")
-def google_login():
-    if not google.authorized:
-        return redirect(url_for("google.login"))
-    resp = google.get("/oauth2/v2/userinfo")
-    if resp.ok:
-        email = resp.json()["email"]
-        user = User()
-        user.id = email
-        login_user(user)
-        return redirect(url_for("home"))
-    else:
-        return "Error"
-
-
-@app.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for("index"))
-
-
-@app.route("/home")
-@login_required
-def home():
-    return render_template("home.html")
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
+    return app
