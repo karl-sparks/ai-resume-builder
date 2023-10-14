@@ -14,8 +14,9 @@
 
     <h1>Welcome to Sparks AI!</h1>
     <p>Please login to continue</p>
-    <a class="btn btn-primary" href="{{ url_for('oauth2_authorize', provider='google') }}">Login with Google</a>
-    
+    <br>
+    <a href="{{url_for('login')}}">Sign in</a>
+
     {% endif %}
 </div>
 {% endblock %}

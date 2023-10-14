@@ -1,4 +1,12 @@
-from flask import Flask, render_template, redirect, flash, url_for, session
+"""This module contains all the routes for the application."""
+import os
+
+import secrets
+import requests
+
+from urllib.parse import urlencode
+
+from dotenv import load_dotenv
 
 from datetime import timedelta
 from sqlalchemy.exc import (
@@ -10,8 +18,8 @@ from sqlalchemy.exc import (
 )
 from werkzeug.routing import BuildError
 
+from flask import Flask, render_template, redirect, flash, url_for, session, current_app
 from flask_bcrypt import Bcrypt, generate_password_hash, check_password_hash
-
 from flask_login import (
     UserMixin,
     login_user,
@@ -32,6 +40,22 @@ def load_user(user_id):
 
 
 app = create_app()
+
+app.config["OAUTH2_PROVIDERS"] = {
+    # Google OAuth 2.0 documentation:
+    # https://developers.google.com/identity/protocols/oauth2/web-server#httprest
+    "google": {
+        "client_id": os.environ.get("GOOGLE_CLIENT_ID"),
+        "client_secret": os.environ.get("GOOGLE_CLIENT_SECRET"),
+        "authorize_url": "https://accounts.google.com/o/oauth2/auth",
+        "token_url": "https://accounts.google.com/o/oauth2/token",
+        "userinfo": {
+            "url": "https://www.googleapis.com/oauth2/v3/userinfo",
+            "email": lambda json: json["email"],
+        },
+        "scopes": ["https://www.googleapis.com/auth/userinfo.email"],
+    }
+}
 
 
 @app.before_request
@@ -75,11 +99,7 @@ def register():
             pwd = form.pwd.data
             username = form.username.data
 
-            newuser = User(
-                username=username,
-                email=email,
-                pwd=bcrypt.generate_password_hash(pwd),
-            )
+            newuser = User(email=email)
 
             db.session.add(newuser)
             db.session.commit()

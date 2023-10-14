@@ -1,4 +1,8 @@
-"""Main application file"""
+"""
+This module contains the main application file for the AI Resume Builder Flask app.
+It initializes the Flask app, sets up the database, and configures the login manager.
+"""
+
 import os
 
 from flask import Flask
@@ -26,6 +30,12 @@ bcrypt = Bcrypt()
 
 
 def create_app():
+    """
+    Creates and returns the Flask app instance.
+
+    Returns:
+        app (Flask): The Flask app instance.
+    """
     app = Flask(__name__)
 
     app.secret_key = os.getenv("SECRET_KEY")

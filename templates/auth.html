@@ -20,63 +20,25 @@
                 {% endwith %}
 
                 <div class="text-center">
-                    <h2>User Authentication in Flask</h2>
-                    <h5 class="text-primary">{{ text }}</h5>
-                    
+                        <h2>Sparks AI User Authentication</h2>
+                        Login with Google to continue.
                 </div>
-                
-                {% if request.path == '/register/' %}
-                <div class="form-group mb-3">
-                    {{ form.username(class_="form-control",placeholder="Username")}}
-                </div>
-                {% for error in form.username.errors %}
-                <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                    {{ error }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                {% endfor%}
-                {% endif%}
-                <div class="form-group mb-3">
-                    {{ form.email(class_="form-control",placeholder="Email")}}
-                </div>
-                {% for error in form.email.errors %}
-                <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                    {{ error }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                {% endfor%}
-                <div class="form-group mb-3">
-                    {{ form.pwd(class_="form-control",placeholder="Password")}}
-                </div>
-                {% for error in form.pwd.errors %}
-                <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                    {{ error }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div> {% endfor%}
-                {% if request.path == '/register/' %}
-                <div class="form-group mb-3">
-                    {{ form.cpwd(class_="form-control",placeholder="Confirm Password")}}
-                </div>
-                {% for error in form.cpwd.errors %}
-                <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                    {{ error }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div> {% endfor%}
-                {% endif %}
-                <div class="text-center">
-
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-block btn-primary mb-3"> {{ btn_action }} </button>
+                <div class="text-left">
+                        <p>
+                        <br>
+                        <br>
+                        By logging in, you agree that:
+                        <ul>
+                            <li>Your information will be stored and processed by Sparks AI.</li>
+                            <li>It may be shared with third-party language model providers like <a href="https://openai.com/">OpenAI.</a></li>
+                            <li>Data will be linked to your email (this includes chat history).</li>
+                            <li>Data will be used to train and improve Sparks AI.</li>
+                        </ul>                        
+                        <br>
                     </div>
-
-                    <p>
-                        {% if request.path != '/register/' %}
-                        New here?
-                        <a href="{{url_for('register')}}">Create account</a>
-                        {% else %}
-                        Already have an account?
-                        <a href="{{url_for('login')}}">Login</a>
-                        {% endif %}
+                    <div class="text-center">
+                        <a class="btn btn-primary" href="{{ url_for('oauth2_authorize', provider='google') }}">Login with Google</a>
+                    </div>
                     </p>
                     
                 </div>
