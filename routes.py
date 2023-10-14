@@ -1,6 +1,8 @@
 """This module contains all the routes for the application."""
 import os
 
+from datetime import timedelta
+
 import secrets
 import requests
 
@@ -8,7 +10,6 @@ from urllib.parse import urlencode
 
 from dotenv import load_dotenv
 
-from datetime import timedelta
 from sqlalchemy.exc import (
     IntegrityError,
     DataError,
@@ -18,10 +19,18 @@ from sqlalchemy.exc import (
 )
 from werkzeug.routing import BuildError
 
-from flask import Flask, render_template, redirect, flash, url_for, session, current_app
+from flask import (
+    render_template,
+    redirect,
+    flash,
+    url_for,
+    session,
+    current_app,
+    request,
+    abort,
+)
 from flask_bcrypt import Bcrypt, generate_password_hash, check_password_hash
 from flask_login import (
-    UserMixin,
     login_user,
     LoginManager,
     current_user,
@@ -38,6 +47,8 @@ from forms import login_form, register_form
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+
+load_dotenv()
 
 app = create_app()
 
@@ -207,6 +218,7 @@ def oauth2_callback(provider):
             ),
         },
         headers={"Accept": "application/json"},
+        timeout=10,
     )
     if response.status_code != 200:
         abort(401)
@@ -221,6 +233,7 @@ def oauth2_callback(provider):
             "Authorization": "Bearer " + oauth2_token,
             "Accept": "application/json",
         },
+        timeout=10,
     )
     if response.status_code != 200:
         abort(401)
