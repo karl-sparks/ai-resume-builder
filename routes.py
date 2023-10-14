@@ -195,5 +195,18 @@ def oauth2_callback(provider):
     return redirect(url_for("index"))
 
 
+@app.route("/sparks-ai")
+@login_required
+def sparks_ai():
+    return render_template("sparks-ai.html", title="Sparks AI")
+
+
+@app.route("/get")
+# function for the bot response
+def get_bot_response():
+    userText = request.args.get("msg")
+    return str(englishBot.get_response(userText))
+
+
 if __name__ == "__main__":
     app.run(debug=True)
