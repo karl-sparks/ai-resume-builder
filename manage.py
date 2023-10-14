@@ -2,6 +2,7 @@
 from flask_migrate import upgrade, migrate, init, stamp
 
 from app import create_app, db
+from models import User
 
 
 def deploy():
@@ -16,11 +17,13 @@ def deploy():
     app.app_context().push()
     db.create_all()
 
+    app.logger.info("Running deployment tasks...")
     # migrate database to latest revision
     init()
     stamp()
     migrate()
     upgrade()
+    app.logger.info("Deployment tasks completed.")
 
 
 if __name__ == "__main__":

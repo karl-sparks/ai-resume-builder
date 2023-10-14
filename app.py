@@ -4,6 +4,7 @@ It initializes the Flask app, sets up the database, and configures the login man
 """
 
 import os
+from dotenv import load_dotenv
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -30,6 +31,8 @@ def create_app():
         app (Flask): The Flask app instance.
     """
     app = Flask(__name__)
+
+    load_dotenv()
 
     app.secret_key = os.getenv("SECRET_KEY")
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
