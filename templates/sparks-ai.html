@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title%} {{ title }} {% endblock %}
+{% block content%}
+
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="static/styles.css">
+    <style>
+        body {
+            background-color: #f7f7f7;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .chat-box {
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+            border-radius: 5px;
+            background-color: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background-color: #dcf8c6;
+            color: #000;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            max-width: 80%;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+            background-color: #e6e6e6;
+            color: #000;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            max-width: 80%;
+        }
+
+        .user-input {
+            display: flex;
+            margin-top: 20px;
+        }
+
+        .input-text {
+            flex: 1;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .input-button {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+
+        .jumbotron {
+            background-color: #4CAF50;
+            color: white;
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="jumbotron text-center">Sparks AI</h1>
+        <div class="chat-container">
+            <div class="chat-box" id="chatbox">
+                <div class="bot-message">Hi! I am Sparks AI, how can I assist you today?</div>
+            </div>
+            <div class="user-input">
+                <textarea id="textInput" class="form-control input-text" name="msg" placeholder="Type Your Message Here"></textarea>
+                <input id="buttonInput" class="btn btn-success input-button" type="button" value="Send">
+            </div>
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    <script>
+        function escapeHtml(text) {
+            var map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+    
+        function getResponse() {
+            let userText = escapeHtml($("#textInput").val());
+            let userHtml = '<div class="user-message">' + userText + '</div>';
+            $("#textInput").val("");
+            $("#chatbox").append(userHtml);
+            $("#chatbox").animate({ scrollTop: $('#chatbox').prop("scrollHeight") }, 1000);
+            $.get("/get", { msg: userText }).done(function(data) {
+                $("#spinner").hide(); // Hide the spinner
+                var botHtml = '<div class="bot-message">' + data + '</div>';
+                $("#chatbox").append(botHtml);
+                $("#chatbox").animate({ scrollTop: $('#chatbox').prop("scrollHeight") }, 1000);
+            });
+        }
+
+        $("#textInput").keypress(function(e) {
+            //if enter key is pressed
+            if (e.which == 13) {
+                $("#spinner").show(); 
+                getResponse();
+            }
+        });
+
+        $("#buttonInput").click(function() {
+            $("#spinner").show(); 
+            getResponse();
+        });
+
+        $(document).ready(function() {
+            $("#spinner").hide(); // Hide the spinner when the page is first loaded
+        });
+
+    </script>
+
+</body>
+
+{% endblock %}

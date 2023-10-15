@@ -1,0 +1,7 @@
+{
+    "RUN_1900-01-01 09:09:28": {
+        "model": "gpt-4",
+        "prompt": "Tell me a joke",
+        "answer": "Why don't scientists trust atoms? \n\nBecause they make up everything!"
+    }
+}
