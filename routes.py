@@ -26,7 +26,7 @@ from flask_login import (
     login_required,
 )
 
-from app import create_app, db, login_manager
+from app import create_app, db, login_manager, sai
 from models import User
 from forms import login_form
 
@@ -203,9 +203,9 @@ def sparks_ai():
 
 @app.route("/get")
 # function for the bot response
-def get_bot_response():
-    userText = request.args.get("msg")
-    return str(englishBot.get_response(userText))
+def get_bot_response() -> str:
+    user_text = request.args.get("msg")
+    return sai.ask_ai(user_text)
 
 
 if __name__ == "__main__":

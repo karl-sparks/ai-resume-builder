@@ -87,8 +87,19 @@
     </div>
 
     <script>
+        function escapeHtml(text) {
+            var map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+    
         function getResponse() {
-            let userText = $("#textInput").val();
+            let userText = escapeHtml($("#textInput").val());
             let userHtml = '<div class="user-message">' + userText + '</div>';
             $("#textInput").val("");
             $("#chatbox").append(userHtml);
@@ -110,10 +121,13 @@
         $("#buttonInput").click(function() {
             getResponse();
         });
+
+        // Rest of your JavaScript code
     </script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
 </body>
 
 {% endblock %}
