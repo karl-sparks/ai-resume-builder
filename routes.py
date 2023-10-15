@@ -8,6 +8,8 @@ import requests
 
 from dotenv import load_dotenv
 
+import markdown
+
 from flask import (
     render_template,
     redirect,
@@ -205,7 +207,16 @@ def sparks_ai():
 # function for the bot response
 def get_bot_response() -> str:
     user_text = request.args.get("msg")
-    return sai.ask_ai(user_text)
+
+    ai_response = sai.ask_ai(user_text)
+
+    return markdown.markdown(
+        ai_response,
+        extensions=[
+            "markdown.extensions.fenced_code",
+            "markdown.extensions.codehilite",
+        ],
+    )
 
 
 if __name__ == "__main__":

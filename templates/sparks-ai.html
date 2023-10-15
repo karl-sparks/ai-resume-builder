@@ -3,7 +3,6 @@
 {% block content%}
 
 <head>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <style>
         body {
@@ -13,7 +12,7 @@
         .chat-container {
             display: flex;
             flex-direction: column;
-            max-width: 500px;
+            max-width: 700px;
             margin: 0 auto;
         }
 
@@ -80,11 +79,15 @@
                 <div class="bot-message">Hi! I am Sparks AI, how can I assist you today?</div>
             </div>
             <div class="user-input">
-                <input id="textInput" class="form-control input-text" type="text" name="msg" placeholder="Type Your Message Here">
+                <textarea id="textInput" class="form-control input-text" name="msg" placeholder="Type Your Message Here"></textarea>
                 <input id="buttonInput" class="btn btn-success input-button" type="button" value="Send">
             </div>
         </div>
     </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
     <script>
         function escapeHtml(text) {
@@ -105,6 +108,7 @@
             $("#chatbox").append(userHtml);
             $("#chatbox").animate({ scrollTop: $('#chatbox').prop("scrollHeight") }, 1000);
             $.get("/get", { msg: userText }).done(function(data) {
+                $("#spinner").hide(); // Hide the spinner
                 var botHtml = '<div class="bot-message">' + data + '</div>';
                 $("#chatbox").append(botHtml);
                 $("#chatbox").animate({ scrollTop: $('#chatbox').prop("scrollHeight") }, 1000);
@@ -114,19 +118,21 @@
         $("#textInput").keypress(function(e) {
             //if enter key is pressed
             if (e.which == 13) {
+                $("#spinner").show(); 
                 getResponse();
             }
         });
 
         $("#buttonInput").click(function() {
+            $("#spinner").show(); 
             getResponse();
         });
 
-        // Rest of your JavaScript code
+        $(document).ready(function() {
+            $("#spinner").hide(); // Hide the spinner when the page is first loaded
+        });
+
     </script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
 </body>
 
