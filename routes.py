@@ -203,7 +203,7 @@ def sparks_ai():
     return render_template("sparks-ai.html", title="Sparks AI")
 
 
-@app.route("/get")
+@app.route("/get", methods=("GET", "POST"))
 # function for the bot response
 def get_bot_response() -> str:
     user_text = request.args.get("msg")
