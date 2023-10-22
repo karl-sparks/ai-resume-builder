@@ -5,6 +5,7 @@
 <head>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="static/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org/dist/htmx.js"></script>
 </head>
 
 <body>
@@ -12,63 +13,18 @@
         <h1 class="jumbotron text-center">Sparks AI</h1>
         <div class="chat-container">
             <div class="chat-box" id="chatbox">
-                <div class="bot-message">Hi! I am Sparks AI, how can I assist you today?</div>
+                {% for message in messages %}
+                    {% if message.user == "bot" %} <div class="bot-message">{{ message.text }}</div> 
+                    {% else %} <div class="user-message">{{ message.text }}</div> 
+                    {% endif %}
+                {% endfor %}
             </div>
-            <div class="user-input">
+            <form hx-post="/ask" hx-target="#chatbox">
                 <textarea id="textInput" class="form-control input-text" name="msg" placeholder="Type Your Message Here"></textarea>
                 <input id="buttonInput" class="btn btn-success input-button" type="button" value="Send">
-            </div>
+            </form>
         </div>
     </div>
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-
-    <script>
-        function escapeHtml(text) {
-            var map = {
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#039;'
-            };
-            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
-        }
-    
-        function getResponse() {
-            let userText = escapeHtml($("#textInput").val());
-            let userHtml = '<div class="user-message">' + userText + '</div>';
-            $("#textInput").val("");
-            $("#chatbox").append(userHtml);
-            $("#chatbox").animate({ scrollTop: $('#chatbox').prop("scrollHeight") }, 1000);
-            $.get("/get", { msg: userText }).done(function(data) {
-                $("#spinner").hide(); // Hide the spinner
-                var botHtml = '<div class="bot-message">' + data + '</div>';
-                $("#chatbox").append(botHtml);
-                $("#chatbox").animate({ scrollTop: $('#chatbox').prop("scrollHeight") }, 1000);
-            });
-        }
-
-        $("#textInput").keypress(function(e) {
-            //if enter key is pressed
-            if (e.which == 13) {
-                $("#spinner").show(); 
-                getResponse();
-            }
-        });
-
-        $("#buttonInput").click(function() {
-            $("#spinner").show(); 
-            getResponse();
-        });
-
-        $(document).ready(function() {
-            $("#spinner").hide(); // Hide the spinner when the page is first loaded
-        });
-
-    </script>
 </body>
 
 {% endblock %}
