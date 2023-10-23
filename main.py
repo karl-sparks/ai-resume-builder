@@ -28,7 +28,7 @@ def index(request: Request) -> HTMLResponse:
 @app.post("/ask-ai", response_class=HTMLResponse)
 def ask_ai(request: Request, message: str = Form(...)) -> HTMLResponse:
     chat_messages.append(ChatMessage(user="user", message=message))
-    print(chat_messages)
+
     return templates.TemplateResponse(
         "chat-messages.html", {"request": request, "chat_messages": chat_messages}
     )

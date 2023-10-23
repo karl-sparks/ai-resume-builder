@@ -3,5 +3,5 @@ migrations/
 instance/
 __pycache__/
 .cache
-venv
+.venv
 resume.docx
