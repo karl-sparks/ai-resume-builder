@@ -15,14 +15,18 @@ class ChatMessage(BaseModel):
 
 
 def add_data_to_parquet(msg: ChatMessage) -> None:
+    input_msg = pl.DataFrame(msg.model_dump()).with_columns(
+        pl.col("id").map_elements(lambda x: str(x))
+    )
+
     if os.path.exists(DATA_FILE_PATH):
         (
             pl.read_parquet(source=DATA_FILE_PATH)
-            .vstack(pl.DataFrame([msg.model_dump()]))
+            .vstack(input_msg)
             .write_parquet(file=DATA_FILE_PATH)
         )
     else:
-        (pl.DataFrame([msg.model_dump()]).write_parquet(file=DATA_FILE_PATH))
+        input_msg.write_parquet(file=DATA_FILE_PATH)
 
 
 class database:
