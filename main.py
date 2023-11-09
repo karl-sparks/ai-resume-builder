@@ -23,6 +23,8 @@ logging.basicConfig(level=logging.DEBUG)
 
 intents = discord.Intents.default()
 
+intents.message_content = True
+
 client = discord.Client(intents=intents)
 
 prompt = ChatPromptTemplate.from_messages(
@@ -61,15 +63,12 @@ async def on_message(msg: Message):
     username = str(msg.author).split("#")[0]
     user_message = str(msg.content)
 
-    logging.info("Received message: %s", msg)
-
     if msg.author == client.user:
         logging.debug("this was my message!")
         return
 
+    logging.info("Received message: %s", user_message)
     output = chat_llm_chain.predict(human_input=user_message)
-
-    logging.info("Sending message: %s", output)
 
     await msg.channel.send(output)
 
