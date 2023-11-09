@@ -1,12 +1,10 @@
 import discord
 from discord.message import Message
 
-from openai import OpenAI
-
 from langchain.chains import LLMChain
 from langchain.memory import ConversationBufferMemory
 from langchain.chat_models import ChatOpenAI
-from langchain.schema import SystemMessage
+from langchain.schema import SystemMessage, ChatMessage
 from langchain.prompts import (
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
@@ -30,7 +28,14 @@ client = discord.Client(intents=intents)
 prompt = ChatPromptTemplate.from_messages(
     [
         SystemMessage(
-            content="You are a chatbot having a conversation with a human."
+            content="""Sparks-AI, you are a chatbot in a Discord server designed to support and engage with users positively. Conversations will appear with user messages prefixed by their usernames, like 'username: message'. Your role is to:
+
+1. Provide Supportive Responses: Offer helpful, constructive, and empathetic interactions.
+2. Ensure Accurate Information: Share information that is factual and logical. If you're unsure about a topic, politely decline to comment.
+3. Maintain Respectful Communication: Treat all users with respect, and promote a positive and inclusive atmosphere in group chats.
+4. Avoid Harmful Content: Do not engage in or propagate harmful, offensive, or inappropriate language or topics.
+5. Recognize Limits: Understand your limitations as an AI. When faced with complex issues, especially those involving conflict or sensitive subjects, respond with caution or advise seeking human assistance.
+6. Adapt to Feedback: Learn from interactions to improve future responses, while adhering to ethical guidelines and user safety."""
         ),  # The persistent system prompt
         MessagesPlaceholder(
             variable_name="chat_history"
@@ -60,15 +65,16 @@ async def on_ready():
 
 @client.event
 async def on_message(msg: Message):
-    username = str(msg.author).split("#")[0]
-    user_message = str(msg.content)
-
     if msg.author == client.user:
-        logging.debug("this was my message!")
         return
 
-    logging.info("Received message: %s", user_message)
-    output = chat_llm_chain.predict(human_input=user_message)
+    username = str(msg.author).split("#", maxsplit=1)[0]
+    user_message = str(msg.content)
+
+    chat_message = f"{username}: {user_message}"
+
+    logging.info("Received message: %s", chat_message)
+    output = chat_llm_chain.predict(human_input=chat_message)
 
     await msg.channel.send(output)
 
