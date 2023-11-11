@@ -72,36 +72,7 @@ chat_llm_chain = LLMChain(
 
 @client.event
 async def on_ready():
-    # Fetch history from guild channels
-    logging.info("Checking Servers")
-    for guild in client.guilds:
-        for channel in guild.channels:
-            if isinstance(channel, discord.TextChannel):
-                try:
-                    async for message in channel.history(
-                        limit=500
-                    ):  # Adjust limit as needed
-                        database.insert_row(message)
-                except discord.errors.Forbidden:
-                    logging.warning(
-                        "Don't have permissions to read %s in %s",
-                        channel.name,
-                        guild.name,
-                    )
-
-    logging.info("Checking DMs")
-    # Fetch history from DM channels
-    for dm_channel in client.private_channels:
-        if isinstance(dm_channel, discord.DMChannel):
-            try:
-                async for message in dm_channel.history(
-                    limit=500
-                ):  # Adjust limit as needed
-                    database.insert_row(message)
-            except discord.errors.Forbidden:
-                logging.warning(
-                    "Don't have permissions to read DM with %s", dm_channel.recipient
-                )
+    logging.info("Logged in as: %s", client.user)
 
 
 @client.event
@@ -109,17 +80,25 @@ async def on_message(msg: Message):
     if msg.author == client.user:
         return
 
+    database.insert_row(msg)
+
     username = str(msg.author).split("#", maxsplit=1)[0]
     user_message = str(msg.content)
-    channel = str(msg.channel)
-    msg_time = str(msg.created_at)
 
-    chat_message = f"username: {username} | channel: {channel} | timestamp: {msg_time} | message: {user_message}"
+    chat_message = f"username: {username} | message: {user_message}"
 
-    logging.info("Received message: %s", chat_message)
-    output = chat_llm_chain.predict(human_input=chat_message)
+    initial_sent_msg = None
 
-    await msg.channel.send(output)
+    async for chunk in chat_llm_chain.astream(input={"human_input": chat_message}):
+        logging.info(chunk)
+        if not initial_sent_msg:
+            initial_sent_msg = await msg.channel.send(chunk["text"])
+        else:
+            await initial_sent_msg.edit(
+                content=str(initial_sent_msg.content) + chunk["text"]
+            )
+
+    database.insert_row(initial_sent_msg)
 
 
 client.run(os.getenv("DISCORD_TOKEN"))
