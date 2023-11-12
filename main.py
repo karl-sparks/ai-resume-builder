@@ -4,7 +4,7 @@ from discord.message import Message
 from langchain.chains import LLMChain
 from langchain.memory import ConversationBufferMemory
 from langchain.chat_models import ChatOpenAI
-from langchain.schema import SystemMessage, ChatMessage
+from langchain.schema import SystemMessage, ChatMessage, AIMessage, HumanMessage
 from langchain.prompts import (
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
@@ -60,14 +60,9 @@ Your goal as Sparks-AI is to enrich the server experience by facilitating engagi
 
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
-llm = ChatOpenAI(model="gpt-4-1106-preview")
+llm = ChatOpenAI(model="gpt-4-1106-preview", streaming=True)
 
-chat_llm_chain = LLMChain(
-    llm=llm,
-    prompt=prompt,
-    verbose=True,
-    memory=memory,
-)
+chat_llm_chain = prompt | llm
 
 
 @client.event
@@ -87,18 +82,46 @@ async def on_message(msg: Message):
 
     chat_message = f"username: {username} | message: {user_message}"
 
+    chat_hist = database.get_row_by_id(str(msg.author.id), "author_id")
+
+    chat_hist_message = []
+
+    for row in chat_hist:
+        if row["author_id"] == "1171714115069284373":
+            chat_hist_message.append(AIMessage(content=row["message_content"]))
+        else:
+            chat_hist_message.append(HumanMessage(content=row["message_content"]))
+
+    logging.info("chat_hist: %s", chat_hist_message)
     initial_sent_msg = None
 
-    async for chunk in chat_llm_chain.astream(input={"human_input": chat_message}):
-        logging.info(chunk)
-        if not initial_sent_msg:
-            initial_sent_msg = await msg.channel.send(chunk["text"])
-        else:
-            await initial_sent_msg.edit(
-                content=str(initial_sent_msg.content) + chunk["text"]
-            )
+    message_to_send = ""
 
-    database.insert_row(initial_sent_msg)
+    async for chunk in chat_llm_chain.astream(
+        input={"human_input": chat_message, "chat_history": chat_hist_message}
+    ):
+        chunk_text = chunk.content
+        if not chunk_text:
+            continue
+        else:
+            message_to_send += chunk_text
+
+            in_code_block = message_to_send.count("```") == 1
+
+            split_msg = message_to_send.rsplit("\n\n", 1)
+
+            if len(split_msg) == 2 and not in_code_block:
+                initial_sent_msg = await msg.channel.send(split_msg[0])
+                message_to_send = split_msg[1]
+                database.insert_row(initial_sent_msg)
+            elif len(message_to_send) > 1500:
+                initial_sent_msg = await msg.channel.send(message_to_send)
+                message_to_send = ""
+                database.insert_row(initial_sent_msg)
+
+    if message_to_send:
+        initial_sent_msg = await msg.channel.send(message_to_send)
+        database.insert_row(initial_sent_msg)
 
 
 client.run(os.getenv("DISCORD_TOKEN"))
