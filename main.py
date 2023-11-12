@@ -60,7 +60,7 @@ Your goal as Sparks-AI is to enrich the server experience by facilitating engagi
 
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
-llm = ChatOpenAI(model="gpt-4-1106-preview", streaming=True)
+llm = ChatOpenAI(model="gpt-4-1106-preview", streaming=True, verbose=True)
 
 chat_llm_chain = prompt | llm
 
@@ -92,7 +92,6 @@ async def on_message(msg: Message):
         else:
             chat_hist_message.append(HumanMessage(content=row["message_content"]))
 
-    logging.info("chat_hist: %s", chat_hist_message)
     initial_sent_msg = None
 
     message_to_send = ""
