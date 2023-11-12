@@ -106,15 +106,7 @@ async def on_message(msg: Message):
         else:
             message_to_send += chunk_text
 
-            in_code_block = message_to_send.count("```") == 1
-
-            split_msg = message_to_send.rsplit("\n\n", 1)
-
-            if len(split_msg) == 2 and not in_code_block:
-                initial_sent_msg = await msg.channel.send(split_msg[0])
-                message_to_send = split_msg[1]
-                database.insert_row(initial_sent_msg)
-            elif len(message_to_send) > 1500:
+            if len(message_to_send) > 1500:
                 initial_sent_msg = await msg.channel.send(message_to_send)
                 message_to_send = ""
                 database.insert_row(initial_sent_msg)
