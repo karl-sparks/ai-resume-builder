@@ -16,6 +16,8 @@ import os
 import logging
 
 from src.big_query import database
+from src.sparks_ai import SparksAI, convert_dict_to_msg_list
+from src.
 
 load_dotenv()
 

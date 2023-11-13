@@ -23,20 +23,7 @@ class SparksAI:
     def __init__(self) -> None:
         pass
 
-    def load_core_mind_file(self) -> str:
-        file_path = CONFIG.MIND_FILE_PATH + "\core-file.md"
-        if os.path.exists(file_path):
-            with open(file_path, "r", encoding="utf-8") as file:
-                file_text = file.read()
-        else:
-            with open(
-                CONFIG.MIND_FILE_PATH + "core-file-starter.md", "r", encoding="utf-8"
-            ) as file:
-                file_text = file.read()
-
-        return file_text
-
-    def self_reflect(self):
+    def review_user(self, username: str):
         mind_file = self.load_core_mind_file()
         all_msgs = convert_dict_to_msg_list(database.get_all_rows())
 
@@ -48,7 +35,7 @@ class SparksAI:
                                               
                                               {all_msgs}
                                               
-                                              Review the above messages and write a detailed analysis of kaimsparks. The analysis should include at least the following points but can include any additional information that is useful for future conversations:
+                                              Review the above messages and write a detailed analysis of {username}. The analysis should include at least the following points but can include any additional information that is useful for future conversations:
                                               
                                               1. Main personality traits
                                               
@@ -58,13 +45,13 @@ class SparksAI:
                                               
                                               5. How do they want you to behave.
                                               
-                                              6. List of confirmed data about kaimsparks
+                                              6. List of confirmed data about {username}
 
                                               If you can not answer a section, add a placeholder stating more information is required.
                                               """
         )
 
-        llm = ChatOpenAI(model="gpt-4-1106-preview")
+        llm = ChatOpenAI(model=CONFIG.GPT_MODEL)
 
         chain = prompt | llm
 
