@@ -35,3 +35,6 @@ class Mind:
 
     def update_mind_file(self, file_name: str, content: str):
         self.mind_files[file_name] = content
+
+    def get_mind_file(self, file_name: str) -> str:
+        return self.mind_files[file_name]
