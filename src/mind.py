@@ -1,4 +1,5 @@
 import os
+from collections import defaultdict
 
 
 class Mind:
@@ -6,7 +7,12 @@ class Mind:
         self.mind_file_root = path_to_mind_files
         self.starter_file_root = path_to_starters
 
-        self.mind_files = {}
+        with open(
+            self.starter_file_root + "unknown-user-starter.md", "r", encoding="utf-8"
+        ) as file:
+            default_mind = file.read()
+
+        self.mind_files = defaultdict(lambda: default_mind)
 
         file_names = os.listdir(self.mind_file_root)
 

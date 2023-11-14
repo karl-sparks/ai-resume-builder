@@ -4,6 +4,7 @@ from langchain.prompts import (
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
     MessagesPlaceholder,
+    SystemMessagePromptTemplate,
 )
 from langchain.chat_models import ChatOpenAI
 from discord.message import Message
@@ -11,6 +12,11 @@ from discord.message import Message
 import src.config as CONFIG
 from src.big_query import database
 from src.mind import Mind
+
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def convert_dict_to_msg_list(rows) -> list:
@@ -26,6 +32,8 @@ def convert_dict_to_msg_list(rows) -> list:
 
 class SparksAI:
     def __init__(self) -> None:
+        logger.info("Init SparksAI()")
+
         self.mind = Mind(
             path_to_mind_files=CONFIG.MIND_FILE_PATH,
             path_to_starters=CONFIG.STARTER_FILE_PATH,
@@ -33,9 +41,8 @@ class SparksAI:
 
         prompt = ChatPromptTemplate.from_messages(
             [
-                SystemMessage(
-                    content=self.mind.get_mind_file("core")
-                ),  # The persistent system prompt
+                SystemMessage(content=self.mind.get_mind_file("core")),
+                SystemMessagePromptTemplate.from_template("{user_mind}"),
                 MessagesPlaceholder(
                     variable_name="chat_history"
                 ),  # Where the memory will be stored.
@@ -49,7 +56,9 @@ class SparksAI:
 
         self.message_llm = prompt | llm
 
-    def review_user(self, username: str):
+    async def review_user(self, username: str):
+        logger.info("Reviewing User Data")
+
         mind_file = self.mind.get_mind_file("core")
         user_file = self.mind.get_mind_file(username)
         all_msgs = convert_dict_to_msg_list(database.get_all_rows())
@@ -86,7 +95,7 @@ class SparksAI:
 
         chain = prompt | llm
 
-        analysis = chain.invoke(
+        analysis = await chain.ainvoke(
             {
                 "mind_file": mind_file,
                 "all_msgs": all_msgs,
@@ -95,6 +104,8 @@ class SparksAI:
             }
         )
 
+        logger.info("Updating mind file")
+
         with open(
             CONFIG.MIND_FILE_PATH + "kaimsparks" + "-mind-file.md",
             "w",
@@ -102,9 +113,13 @@ class SparksAI:
         ) as file:
             file.write(analysis.content)
 
+        logger.info("Finished review")
+
         return None
 
     async def handle_message(self, msg: Message) -> None:
+        logger.info("Handling Msg")
+
         database.insert_row(msg)
 
         username = str(msg.author).split("#", maxsplit=1)[0]
@@ -127,7 +142,11 @@ class SparksAI:
         message_to_send = ""
 
         async for chunk in self.message_llm.astream(
-            input={"human_input": chat_message, "chat_history": chat_hist_message}
+            input={
+                "human_input": chat_message,
+                "chat_history": chat_hist_message,
+                "user_mind": self.mind.get_mind_file(username),
+            }
         ):
             chunk_text = chunk.content
             if not chunk_text:
@@ -143,3 +162,5 @@ class SparksAI:
         if message_to_send:
             initial_sent_msg = await msg.channel.send(message_to_send)
             database.insert_row(initial_sent_msg)
+
+        await self.review_user(username=username)
