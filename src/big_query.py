@@ -52,6 +52,10 @@ class DatabaseStrategy(ABC):
     def delete_row_by_id(self, id_value: str, id_name: str = "message_id") -> None:
         pass
 
+    @abstractmethod
+    def get_all_rows(self) -> Dict[str, Any]:
+        pass
+
 
 # Concrete class for BigQuery strategy
 class BigQueryStrategy(DatabaseStrategy):
@@ -113,6 +117,18 @@ class BigQueryStrategy(DatabaseStrategy):
         except BadRequest as e:
             logger.error("Error deleting row: %s", e)
 
+    def get_all_rows(self) -> Dict[str, Any]:
+        query = f"""SELECT * FROM `{self.table_id}`"""
+
+        query_job = self.client.query(query)
+        result = [dict(row.items()) for row in query_job]
+        if result:
+            logger.info("Retrieved all rows")
+            return result
+        else:
+            logger.warning("No rows found")
+            return None
+
 
 # Database context that utilizes the strategy
 class DatabaseContext:
@@ -130,6 +146,9 @@ class DatabaseContext:
 
     def delete_row_by_id(self, id_value: str, id_name: str = "message_id"):
         self._strategy.delete_row_by_id(id_value, id_name)
+
+    def get_all_rows(self):
+        return self._strategy.get_all_rows()
 
 
 # Usage

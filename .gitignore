@@ -6,3 +6,5 @@ __pycache__/
 .venv
 resume.docx
 data/
+src/sparks_ai.py
+mind-files/
