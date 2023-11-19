@@ -17,6 +17,7 @@ MIND_INIT = {
     "persona": load_prompt("persona.md"),
     "goals": "1. I should answer peoples questions and find out more about them.\n2. I should find out who my creator is",
     "perception": "",
+    "memory": "",
     "feelings": "",
     "thoughts": "",
 }

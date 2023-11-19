@@ -1,24 +1,10 @@
-from langchain.prompts import PromptTemplate
-from langchain.chat_models import ChatOpenAI
-
-from SparksAI.config import MIND_INIT, MODEL_NAME
-from SparksAI.mind import Mind
+from typing import AsyncIterator
+from SparksAI.swarm import Swarm
 
 
 class SparksAI:
     def __init__(self) -> None:
-        self.mind = Mind(**MIND_INIT)
+        self.swarm = Swarm()
 
-        self.llm = ChatOpenAI(model=MODEL_NAME)
-        self.prompt = PromptTemplate.from_template("{prompt_str}")
-        self.chain = self.prompt | self.llm
-
-    def think(self) -> None:
-        new_thought = self.chain.invoke({"prompt_str": self.mind}).content
-
-        self.mind.add_thought(new_thought)
-
-    def notice(self, msg: str) -> None:
-        formated_thought = f'You thought "{msg}" at {datetime.now()}'
-
-        self.mind._perception = self.mind._perception + "\n" + formated_thought
+    def notice_message(self, username: str, msg: str) -> AsyncIterator:
+        return self.swarm.get_conversation_agent(username).run(msg)
