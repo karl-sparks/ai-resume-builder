@@ -11,7 +11,7 @@ class SparksAI:
         self.swarm = Swarm()
 
     def notice_message(self, username: str, msg: str) -> AsyncIterator:
-        convo_memory = FileChatMessageHistory(f"{username}_memory.txt").messages.
+        convo_memory = FileChatMessageHistory(f"{username}_memory.txt").messages
 
         message_summary = self.swarm.get_archivist(username).run(msg)
         logger.info(message_summary)
