@@ -41,7 +41,8 @@ async def on_message(msg: Message):
     inside_code = False
     resend_msg = True
 
-    for chunk in sparks_ai.notice_message(username=username, msg=user_message):
+    async for chunk_a in sparks_ai.notice_message(username=username, msg=user_message):
+        chunk = chunk_a.content
         message_to_send += chunk
         if resend_msg and message_to_send.strip():
             initial_sent_msg = await msg.channel.send(message_to_send)
