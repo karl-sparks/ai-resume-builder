@@ -16,21 +16,22 @@ class SparksAI:
         self.memory.get_convo_mem(username=username).add_user_message(msg)
 
         convo_memory = self.memory.get_convo_mem(username=username).messages
+        logger.info("Getting message summary")
         message_summary = await self.swarm.get_archivist(username).ainvoke(
             {"input_message": msg, "memory": convo_memory}
         )
-        logger.info(message_summary)
 
+        logger.info("Getting Analyst Comments")
         analyst_review = await self.swarm.get_analyst_agent().ainvoke(
             {"content": f"Context: {message_summary}\n\nUser message: {msg}"}
         )
 
-        logger.info(analyst_review["output"])
+        inputs_dict = {
+            "prior_messages": message_summary.content,
+            "analyst_message": analyst_review["output"],
+            "input_message": msg,
+        }
 
-        return self.swarm.get_conversation_agent(username).astream(
-            {
-                "prior_messages": message_summary,
-                "analyst_message": analyst_review["output"],
-                "input_message": msg,
-            }
-        )
+        logger.info(inputs_dict)
+
+        return self.swarm.get_conversation_agent(username).astream(input=inputs_dict)

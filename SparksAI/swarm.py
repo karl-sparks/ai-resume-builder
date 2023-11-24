@@ -9,7 +9,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain.prompts import MessagesPlaceholder, PromptTemplate
 from langchain.utilities import SerpAPIWrapper
 
-from SparksAI.config import MODEL_NAME
+from SparksAI.config import MODEL_NAME, CONVERSATION_ANALYST_ID
 
 
 class Swarm:
@@ -86,16 +86,8 @@ class Swarm:
             ),
         ]
 
-        ai_assistant = OpenAIAssistantRunnable.create_assistant(
-            name="Conversation Analyst",
-            instructions="""
-            You are an analyst responsible for reviewing and responding to user messages.
-            Your primary task is to evaluate each message for clarity and content, providing structured guidance on formulating comprehensive and logical responses.
-            In addition to offering response strategies, you are also tasked with analyzing the messages to anticipate and formulate what a more detailed or specific follow-up question from the user might entail.
-            This includes identifying any underlying assumptions, implicit queries, or additional information that the user might require for a complete understanding.
-            If needed, you can provide additional information using your search function.""",
-            tools=tools,
-            model=MODEL_NAME,
+        ai_assistant = OpenAIAssistantRunnable(
+            assistant_id=CONVERSATION_ANALYST_ID,
             as_agent=True,
         )
 
