@@ -1,37 +1,51 @@
+"""Contains the core code for running SparksAI"""
 import logging
 from typing import AsyncIterator
-from langchain.memory.chat_message_histories import FileChatMessageHistory
+
+from langchain import agents
+from langchain.agents import openai_assistant
+
+from discord import Message, DMChannel
+
+from SparksAI import config
+from SparksAI import tools
 from SparksAI.swarm import Swarm
 from SparksAI.memory import AIMemory
+from SparksAI.async_helpers import AreturnMessageIterator
 
 logger = logging.getLogger(__name__)
 
 
 class SparksAI:
-    def __init__(self) -> None:
+    """Core SparksAI Class, handles noticing messages and generating replies"""
+
+    def __init__(self):
+        logging.info("Initialising SparksAI")
         self.swarm = Swarm()
         self.memory = AIMemory()
+        self.thread_ids = {}
+        agent = openai_assistant.OpenAIAssistantRunnable(
+            assistant_id=config.TAV_DECIDER_ID, as_agent=True
+        )
+
+        self.decider = agents.AgentExecutor(
+            agent=agent,
+            tools=tools.SPARKS_AI_TOOLKIT,
+            verbose=True,
+        )
 
     async def notice_message(self, username: str, msg: str) -> AsyncIterator:
         self.memory.get_convo_mem(username=username).add_user_message(msg)
 
-        convo_memory = self.memory.get_convo_mem(username=username).messages
-        logger.info("Getting message summary")
-        message_summary = await self.swarm.get_archivist(username).ainvoke(
-            {"input_message": msg, "memory": convo_memory}
-        )
+        input_msg = {"content": msg}
 
-        logger.info("Getting Analyst Comments")
-        analyst_review = await self.swarm.get_analyst_agent().ainvoke(
-            {"content": f"Context: {message_summary}\n\nUser message: {msg}"}
-        )
+        if username in self.thread_ids:
+            input_msg["thread_id"] = self.thread_ids[username]
 
-        inputs_dict = {
-            "prior_messages": message_summary.content,
-            "analyst_message": analyst_review["output"],
-            "input_message": msg,
-        }
+        response = await self.decider.ainvoke(input_msg)
 
-        logger.info(inputs_dict)
+        logger.info(response)
 
-        return self.swarm.get_conversation_agent(username).astream(input=inputs_dict)
+        self.thread_ids[username] = response["thread_id"]
+
+        return AreturnMessageIterator(response["output"], 20)

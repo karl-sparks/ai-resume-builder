@@ -6,7 +6,7 @@ import asyncio
 
 import discord
 from discord.message import Message
-from discord import errors
+from discord import errors, DMChannel
 
 from dotenv import load_dotenv
 
@@ -42,7 +42,7 @@ def should_split_message(message):
     return len(message) >= MAX_MESSAGE_LENGTH
 
 
-async def split_and_send_message(
+def split_and_send_message(
     message: str, sent_msg: Message, channel
 ) -> (str, Optional[Message]):
     """Split the message and handle code blocks if the message exceeds max length."""
@@ -92,6 +92,9 @@ async def on_message(msg: Message):
     if msg.author == client.user:
         return
 
+    if not isinstance(msg.channel, DMChannel):
+        return
+
     username = str(msg.author).split("#", maxsplit=1)[0]
     user_message = str(msg.content)
 
@@ -102,11 +105,11 @@ async def on_message(msg: Message):
     async for chunk_a in await sparks_ai.notice_message(
         username=username, msg=user_message
     ):
-        chunk = chunk_a.content
+        chunk = chunk_a  # This in place until proper streaming is support by OpenAI Assistants
         message_to_send += chunk
 
         if should_split_message(message_to_send):
-            message_to_send, sent_msg = await split_and_send_message(
+            message_to_send, sent_msg = split_and_send_message(
                 message_to_send, sent_msg, msg.channel
             )
 

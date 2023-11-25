@@ -1,15 +1,17 @@
-from langchain.agents import AgentType, Tool, initialize_agent, AgentExecutor
+from dotenv import load_dotenv
+
+from langchain.agents import Tool, AgentExecutor
 from langchain.agents.openai_assistant import OpenAIAssistantRunnable
 from langchain.callbacks.streaming_stdout_final_only import (
     FinalStreamingStdOutCallbackHandler,
 )
 from langchain.chat_models import ChatOpenAI
-from langchain.chains import LLMChain
-from langchain.memory import ConversationBufferMemory
-from langchain.prompts import MessagesPlaceholder, PromptTemplate
+from langchain.prompts import PromptTemplate
 from langchain.utilities import SerpAPIWrapper
 
 from SparksAI.config import MODEL_NAME, CONVERSATION_ANALYST_ID
+
+load_dotenv()
 
 
 class Swarm:

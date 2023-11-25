@@ -1,6 +1,19 @@
 import os
 
 MODEL_NAME = "gpt-4-1106-preview"
+
+# DALL E CONFIG DETAILS
+DALL_E_MODEL_NAME = "dall-e-3"
+DALL_E_SIZE = "1024x1024"
+DALL_E_QUALITY = "hd"
+DALL_E_MAX_PROMPT_SIZE = 4000
+
+# Assistant IDs
+
 CONVERSATION_ANALYST_ID = "asst_0ahZZHRMbiU8f6sbMjwINgRI"
+TAV_DECIDER_ID = "asst_DuXlZQDJWwhwva2TchMnkL4X"
+
+# Discord Message Settings
+
 MAX_MESSAGE_LENGTH = 1950
 BUFFER_SIZE = 300
