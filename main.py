@@ -103,7 +103,9 @@ async def on_message(msg: Message):
     sent_msg = None
 
     async for chunk_a in await sparks_ai.notice_message(
-        username=username, msg=user_message
+        username=username,
+        msg=user_message,
+        run_id=f"{username}_{msg.channel.id}_{msg.id}",
     ):
         chunk = chunk_a  # This in place until proper streaming is support by OpenAI Assistants
         message_to_send += chunk

@@ -4,7 +4,10 @@ from langchain.agents import openai_assistant
 
 from SparksAI import tools
 from SparksAI import config
+from SparksAI import tools
 
+
+SPARKS_AI_TOOLKIT = [tools.ImageAgentTool(), tools.ResearchAgentTool()]
 
 openai_assistant.OpenAIAssistantRunnable.create_assistant(
     name="tav_decider",

@@ -24,27 +24,34 @@ class SparksAI:
         self.swarm = Swarm()
         self.memory = AIMemory()
         self.thread_ids = {}
-        agent = openai_assistant.OpenAIAssistantRunnable(
+        self.agent = openai_assistant.OpenAIAssistantRunnable(
             assistant_id=config.TAV_DECIDER_ID, as_agent=True
         )
 
-        self.decider = agents.AgentExecutor(
-            agent=agent,
-            tools=tools.SPARKS_AI_TOOLKIT,
+    async def notice_message(
+        self, username: str, msg: str, run_id: str
+    ) -> AsyncIterator:
+        self.memory.get_convo_mem(username=username).add_user_message(msg)
+
+        decider = agents.AgentExecutor(
+            agent=self.agent,
+            tools=[
+                tools.ImageAgentTool(run_id=run_id),
+                tools.ResearchAgentTool(run_id=run_id),
+            ],
             verbose=True,
         )
-
-    async def notice_message(self, username: str, msg: str) -> AsyncIterator:
-        self.memory.get_convo_mem(username=username).add_user_message(msg)
 
         input_msg = {"content": msg}
 
         if username in self.thread_ids:
             input_msg["thread_id"] = self.thread_ids[username]
 
-        response = await self.decider.ainvoke(input_msg)
+        logger.info("%s: getting response : %s", run_id, input_msg)
 
-        logger.info(response)
+        response = await decider.ainvoke(input_msg)
+
+        logger.info("%s: response", run_id)
 
         self.thread_ids[username] = response["thread_id"]
 

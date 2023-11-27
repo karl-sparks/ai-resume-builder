@@ -32,9 +32,13 @@ class ImageAgentTool(BaseTool):
     args_schema: Type[BaseModel] = ImageAgentInput
 
     def _run(self, prompt: str, style: str) -> str:
+        id_run = "unknown_run"
+        logger.info("%s : Running Image Agent : %s : %s", id_run, prompt, style)
         return agents.image_agent(prompt, style)
 
     async def _arun(self, prompt: str, style: str) -> str:
+        id_run = "unknown_run"
+        logger.info("%s : Running Image Agent : %s : %s", id_run, prompt, style)
         return await agents.image_agent(prompt, style)
 
 
@@ -58,12 +62,13 @@ class ResearchAgentTool(BaseTool):
     args_schema: Type[BaseModel] = ResearchAgentInput
 
     def _run(self, prompt: str, username: str) -> str:
+        id_run = "unknown_run"
+        logger.info("%s : Running Research Agent : %s : %s", id_run, prompt, username)
         response = agents.research_agent(prompt, username)
         return str(response)
 
     async def _arun(self, prompt: str, username: str) -> str:
+        id_run = "unknown_run"
+        logger.info("%s : Running Research Agent : %s : %s", id_run, prompt, username)
         response = await agents.research_agent(prompt, username)
         return str(response)
-
-
-SPARKS_AI_TOOLKIT = [ImageAgentTool(), ResearchAgentTool()]
