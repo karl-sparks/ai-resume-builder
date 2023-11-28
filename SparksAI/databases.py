@@ -90,7 +90,7 @@ class BigQueryStrategy(DatabaseStrategy):
         Returns:
             bool: True if the row was inserted successfully, False otherwise.
         """
-        errors = self.client.insert_rows_json(self.table_id, [row.dict()])
+        errors = self.client.insert_rows_json(self.table_id, [row.model_dump()])
 
         if errors:
             logger.error("Encountered errors while inserting rows: %s", errors)
@@ -185,7 +185,3 @@ class DatabaseContext:
 
 
 # Usage
-table_id_str = os.getenv("BIGQUERY_USER_DETAILS_TALBE_ID")
-bigquery_strategy = BigQueryStrategy(table_id=table_id_str)
-
-database = DatabaseContext(strategy=bigquery_strategy)
