@@ -36,8 +36,8 @@ class SparksAI:
         decider = agents.AgentExecutor(
             agent=self.agent,
             tools=[
-                tools.ImageAgentTool(run_id=run_id),
-                tools.ResearchAgentTool(run_id=run_id),
+                tools.ImageAgentTool(),
+                tools.ResearchAgentTool(),
             ],
             verbose=True,
         )
@@ -51,7 +51,7 @@ class SparksAI:
 
         response = await decider.ainvoke(input_msg)
 
-        logger.info("%s: response", run_id)
+        logger.info("%s: response : %s", run_id, response)
 
         self.thread_ids[username] = response["thread_id"]
 
