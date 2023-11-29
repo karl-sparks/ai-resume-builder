@@ -3,7 +3,7 @@ from typing import Optional, List
 import os
 
 from abc import ABC, abstractmethod
-from google.cloud import bigquery
+from google.cloud import bigquery, firestore
 from google.api_core.exceptions import BadRequest
 
 from dotenv import load_dotenv
@@ -163,6 +163,50 @@ class BigQueryStrategy(DatabaseStrategy):
             return False
 
 
+class FireBaseStrategy(DatabaseStrategy):
+    def __init__(self, collection_name: str):
+        self.client = firestore.Client()
+        self.collection_name = collection_name
+
+    def insert_row(self, row: UserDetails) -> bool:
+        doc_ref = self.client.collection(self.collection_name).document(
+            str(row.user_id)
+        )
+        doc_ref.set(row.model_dump())
+        logger.info("Row inserted successfully: %s", row.user_id)
+        return True
+
+    def get_row_by_username(self, username: str) -> Optional[UserDetails]:
+        docs = (
+            self.client.collection(self.collection_name)
+            .where("discord_user_name", "==", username)
+            .stream()
+        )
+        for doc in docs:
+            return UserDetails(**doc.to_dict())
+        return None
+
+    def get_all_rows(self) -> Optional[List[UserDetails]]:
+        docs = self.client.collection(self.collection_name).stream()
+        result = [UserDetails(**doc.to_dict()) for doc in docs]
+        if result:
+            logger.info("Retrieved all user details")
+            return result
+        logger.warning("Failed to find user details")
+        return None
+
+    def delete_row_by_username(self, username: str) -> bool:
+        docs = (
+            self.client.collection(self.collection_name)
+            .where("discord_user_name", "==", username)
+            .stream()
+        )
+        for doc in docs:
+            doc.reference.delete()
+        logger.info("User details successfully deleted for user: %s", username)
+        return True
+
+
 # Database context that utilizes the strategy
 class DatabaseContext:
     def __init__(self, strategy: DatabaseStrategy):
@@ -182,6 +226,3 @@ class DatabaseContext:
 
     def delete_row_by_username(self, username: str) -> bool:
         return self._strategy.delete_row_by_username(username)
-
-
-# Usage
