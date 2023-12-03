@@ -179,7 +179,7 @@ class FireBaseStrategy(DatabaseStrategy):
     def get_row_by_username(self, username: str) -> Optional[UserDetails]:
         docs = (
             self.client.collection(self.collection_name)
-            .where("discord_user_name", "==", username)
+            .where(field_path="discord_user_name", op_string="==", value=username)
             .stream()
         )
         for doc in docs:
@@ -198,7 +198,7 @@ class FireBaseStrategy(DatabaseStrategy):
     def delete_row_by_username(self, username: str) -> bool:
         docs = (
             self.client.collection(self.collection_name)
-            .where("discord_user_name", "==", username)
+            .where(field_path="discord_user_name", op_string="==", value=username)
             .stream()
         )
         for doc in docs:

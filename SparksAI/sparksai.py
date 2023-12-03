@@ -1,14 +1,14 @@
 """Contains the core code for running SparksAI"""
 import logging
+import os
 from typing import AsyncIterator
 
 from langchain import agents
 from langchain.agents import openai_assistant
 
-from discord import Message, DMChannel
-
 from SparksAI import config
 from SparksAI import tools
+from SparksAI import databases
 from SparksAI.swarm import Swarm
 from SparksAI.memory import AIMemory
 from SparksAI.async_helpers import AreturnMessageIterator
@@ -22,8 +22,9 @@ class SparksAI:
     def __init__(self):
         logging.info("Initialising SparksAI")
         self.swarm = Swarm()
-        self.memory = AIMemory()
-        self.thread_ids = {}
+        self.memory = AIMemory(
+            databases.FireBaseStrategy(os.getenv("FIREBASE_TABLE_ID"))
+        )
         self.agent = openai_assistant.OpenAIAssistantRunnable(
             assistant_id=config.TAV_DECIDER_ID, as_agent=True
         )
@@ -44,8 +45,13 @@ class SparksAI:
 
         input_msg = {"content": msg}
 
-        if username in self.thread_ids:
-            input_msg["thread_id"] = self.thread_ids[username]
+        thread_id = self.memory.reterive_user_thread_id(username=username)
+
+        if thread_id:
+            logger.info("Found existing thread id: %s for user %s", thread_id, username)
+            input_msg["thread_id"] = thread_id
+        else:
+            logger.info("Can not find thread id for username %s", username)
 
         logger.info("%s: getting response : %s", run_id, input_msg)
 
@@ -53,6 +59,6 @@ class SparksAI:
 
         logger.info("%s: response : %s", run_id, response)
 
-        self.thread_ids[username] = response["thread_id"]
+        self.memory.update_user_details(username, response["thread_id"])
 
         return AreturnMessageIterator(response["output"], 20)

@@ -1,5 +1,7 @@
 import os
 
+from typing import Optional
+
 from langchain.memory import FileChatMessageHistory
 
 from SparksAI import databases
@@ -7,21 +9,16 @@ from SparksAI.models import UserDetails
 
 
 class AIMemory:
-    def __init__(self) -> None:
+    def __init__(self, database_strategy: databases.DatabaseStrategy) -> None:
         self._convo_mem = {}
         self._user_details = {}
 
         # initialise db
-        bigquery_strategy = databases.BigQueryStrategy(
-            table_id=os.getenv("BIGQUERY_USER_DETAILS_TALBE_ID")
-        )
+        self._db = databases.DatabaseContext(strategy=database_strategy)
 
-        self._db = databases.DatabaseContext(strategy=bigquery_strategy)
-
-        users = self._db.get_all_rows()
-
-        for user in users:
-            self._user_details[user.username] = user
+        self._user_details = {
+            user.discord_user_name: user for user in self._db.get_all_rows()
+        }
 
     def get_convo_mem(self, username: str) -> FileChatMessageHistory:
         if username in self._convo_mem:
@@ -32,18 +29,26 @@ class AIMemory:
 
             return self._convo_mem[username]
 
-    def reterive_user_thread_id(self, username: str) -> str:
+    def reterive_user_thread_id(self, username: str) -> Optional[str]:
         if username in self._user_details:
             return self._user_details[username].thread_id
 
-        return self._db.get_row_by_username(username).thread_id
+        return None
 
     def update_user_details(self, username: str, thread_id: str) -> None:
-        self._user_details[username] = UserDetails(
-            username=username, thread_id=thread_id
-        )
-        self._db.insert_row(self._user_details[username])
+        if username not in self._user_details:
+            self._user_details[username] = UserDetails(
+                discord_user_name=username, thread_id=thread_id
+            )
+        else:
+            self._user_details[username].thread_id = thread_id
 
-    def update_db(self) -> None:
+        self.sync_users()
+
+    def sync_users(self) -> None:
         for _, user in self._user_details.items():
             self._db.insert_row(user)
+
+        self._user_details = {
+            user.discord_user_name: user for user in self._db.get_all_rows()
+        }

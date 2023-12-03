@@ -1,6 +1,7 @@
 """Module Containing Agents used in AI Swarm"""
 import logging
 from typing import Literal, Optional, List
+import os
 import openai
 
 from langchain.tools import BaseTool
@@ -16,6 +17,7 @@ from langchain.callbacks.streaming_stdout_final_only import (
 )
 
 from SparksAI import config
+from SparksAI import databases
 from SparksAI.memory import AIMemory
 from SparksAI.swarm import Swarm
 
@@ -23,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 openai_client = openai.Client()
 
-memory = AIMemory()
+memory = AIMemory(databases.FireBaseStrategy(os.getenv("FIREBASE_TABLE_ID")))
 
 swarm = Swarm()
 
