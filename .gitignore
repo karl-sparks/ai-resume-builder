@@ -10,3 +10,4 @@ src/sparks_ai.py
 mind-files/
 *_memory.txt
 .aider*
+credentials.json
