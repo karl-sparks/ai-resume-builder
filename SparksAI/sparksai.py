@@ -11,7 +11,7 @@ from SparksAI import tools
 from SparksAI import databases
 from SparksAI.swarm import Swarm
 from SparksAI.memory import AIMemory
-from SparksAI.async_helpers import AreturnMessageIterator
+from SparksAI.async_helpers import AsyncMessageIterator
 
 logger = logging.getLogger(__name__)
 
@@ -61,4 +61,4 @@ class SparksAI:
 
         self.memory.update_user_details(username, response["thread_id"])
 
-        return AreturnMessageIterator(response["output"], 20)
+        return AsyncMessageIterator(response["output"], 20)

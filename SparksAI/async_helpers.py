@@ -2,7 +2,7 @@
 from collections.abc import AsyncIterator, Awaitable
 
 
-class AreturnMessageIterator(AsyncIterator):
+class AsyncMessageIterator(AsyncIterator):
     """
     It is currently used as a temporary solution to convert non-streamed output into streamed output.
     This approach allows me to avoid reimplementing the message-sending functionality and use the Assistant

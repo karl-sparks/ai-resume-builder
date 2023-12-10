@@ -11,6 +11,7 @@ from discord import errors, DMChannel
 from dotenv import load_dotenv
 
 from SparksAI.sparksai import SparksAI
+from SparksAI.async_helpers import AsyncMessageIterator
 from SparksAI.config import MAX_MESSAGE_LENGTH, BUFFER_SIZE
 
 load_dotenv()
@@ -102,11 +103,20 @@ async def on_message(msg: Message):
     buffer = 0
     sent_msg = None
 
-    async for chunk_a in await sparks_ai.notice_message(
-        username=username,
-        msg=user_message,
-        run_id=f"{username}_{msg.channel.id}_{msg.id}",
-    ):
+    try:
+        msg_recieved = await sparks_ai.notice_message(
+            username=username,
+            msg=user_message,
+            run_id=f"{username}_{msg.channel.id}_{msg.id}",
+        )
+    except ValueError as e:
+        logging.error(e)
+        msg_recieved = AsyncMessageIterator(
+            "An unexpected error occured, this could be related to an OpenAI API or an internal error.",
+            20,
+        )
+
+    async for chunk_a in msg_recieved:
         chunk = chunk_a  # This in place until proper streaming is support by OpenAI Assistants
         message_to_send += chunk
 
