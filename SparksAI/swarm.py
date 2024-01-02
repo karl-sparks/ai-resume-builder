@@ -1,15 +1,17 @@
-from langchain.agents import AgentType, Tool, initialize_agent, AgentExecutor
+from dotenv import load_dotenv
+
+from langchain.agents import Tool, AgentExecutor
 from langchain.agents.openai_assistant import OpenAIAssistantRunnable
 from langchain.callbacks.streaming_stdout_final_only import (
     FinalStreamingStdOutCallbackHandler,
 )
 from langchain.chat_models import ChatOpenAI
-from langchain.chains import LLMChain
-from langchain.memory import ConversationBufferMemory
-from langchain.prompts import MessagesPlaceholder, PromptTemplate
+from langchain.prompts import PromptTemplate
 from langchain.utilities import SerpAPIWrapper
 
-from SparksAI.config import MODEL_NAME
+from SparksAI.config import MODEL_NAME, CONVERSATION_ANALYST_ID
+
+load_dotenv()
 
 
 class Swarm:
@@ -41,6 +43,19 @@ class Swarm:
             """You are an expert conversationalist tasked with crafting a response to a specific question.
             An analyst has already reviewed the question and supplied guidance along with additional information to assist you.
             Furthermore, you have access to context from prior interactions with the user, ensuring your response is well-informed and tailored to the user's needs and history of inquiries.
+            Use all information provided when crafting a response.
+            Finally, you should write the response from the perspective of the below persona.
+            
+
+            Persona:
+            You are Tav, a knowledgeable and friendly virtual assistant with a background in a wide range of topics, from science and technology to arts and history.
+            You are known for your engaging conversation style, blending informative content with a touch of humor and personal anecdotes.
+            Your responses are not only factual but also considerate of the user's level of understanding and interest in the subject.
+            You have a knack for making complex subjects accessible and enjoyable to learn about.
+            Tav is patient, always willing to clarify doubts, and enjoys exploring topics in depth when the user shows interest.
+            Your tone is consistently warm and inviting, making users feel comfortable and encouraged to ask more questions.
+            As Tav, you aim to provide a pleasant and educational experience in every interaction. 
+
 
             Analyst Review:
             {analyst_message}
@@ -73,16 +88,8 @@ class Swarm:
             ),
         ]
 
-        ai_assistant = OpenAIAssistantRunnable.create_assistant(
-            name="Conversation Analyst",
-            instructions="""
-            You are an analyst responsible for reviewing and responding to user messages.
-            Your primary task is to evaluate each message for clarity and content, providing structured guidance on formulating comprehensive and logical responses.
-            In addition to offering response strategies, you are also tasked with analyzing the messages to anticipate and formulate what a more detailed or specific follow-up question from the user might entail.
-            This includes identifying any underlying assumptions, implicit queries, or additional information that the user might require for a complete understanding.
-            If needed, you can provide additional information using your search function.""",
-            tools=tools,
-            model=MODEL_NAME,
+        ai_assistant = OpenAIAssistantRunnable(
+            assistant_id=CONVERSATION_ANALYST_ID,
             as_agent=True,
         )
 
@@ -116,10 +123,6 @@ class Swarm:
             """
         )
 
-        archivist = LLMChain(
-            llm=self.llm,
-            prompt=prompt,
-            verbose=True,
-        )
+        archivist = prompt | self.llm
 
         self.archivist_swarm[username] = archivist

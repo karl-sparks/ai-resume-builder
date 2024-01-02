@@ -8,3 +8,8 @@ resume.docx
 data/
 src/sparks_ai.py
 mind-files/
+*_memory.txt
+.aider*
+credentials.json
+README_files/
+README.html

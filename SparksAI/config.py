@@ -1,23 +1,19 @@
 import os
 
-
-def load_prompt(file_name: str) -> str:
-    file_path = os.path.join(os.getcwd(), "SparksAI", "prompts", file_name)
-
-    with open(file_path, "r", encoding="utf-8") as file:
-        text = file.read()
-
-    return text
-
-
 MODEL_NAME = "gpt-4-1106-preview"
 
-MIND_INIT = {
-    "system": load_prompt("system.md"),
-    "persona": load_prompt("persona.md"),
-    "goals": "1. I should answer peoples questions and find out more about them.\n2. I should find out who my creator is",
-    "perception": "",
-    "memory": "",
-    "feelings": "",
-    "thoughts": "",
-}
+# DALL E CONFIG DETAILS
+DALL_E_MODEL_NAME = "dall-e-3"
+DALL_E_SIZE = "1024x1024"
+DALL_E_QUALITY = "hd"
+DALL_E_MAX_PROMPT_SIZE = 4000
+
+# Assistant IDs
+
+CONVERSATION_ANALYST_ID = "asst_0ahZZHRMbiU8f6sbMjwINgRI"
+TAV_DECIDER_ID = "asst_DuXlZQDJWwhwva2TchMnkL4X"
+
+# Discord Message Settings
+
+MAX_MESSAGE_LENGTH = 1950
+BUFFER_SIZE = 300
